@@ -110,9 +110,6 @@ async function boot() {
   await Promise.all([
     loadSheet("field", "./assets/field/field.bmp", "./assets/field/fielddata.dat"),
     loadSheet("object", "./assets/object/object.png", "./assets/object/objectdata.dat"),
-    loadLooseChip("field", "black", "./assets/field/black.png"),
-    loadLooseChip("field", "red", "./assets/field/red.png"),
-    loadLooseChip("field", "white", "./assets/field/white.png"),
   ]);
   let draft = null;
   try {
@@ -385,17 +382,6 @@ async function loadSheetFiles(type, imageFile, dataFile, skipNames = new Set(), 
     count += 1;
   }
   return count;
-}
-
-async function loadLooseChip(type, name, url) {
-  const image = await loadImage(url);
-  registerChip(type, {
-    name,
-    type: type === "field" ? 0 : 1,
-    width: Math.max(1, image.naturalWidth / CELL_SOURCE),
-    height: Math.max(1, image.naturalHeight / CELL_SOURCE),
-    image,
-  }, true);
 }
 
 function registerChip(type, chip, replace = false) {

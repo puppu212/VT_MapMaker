@@ -1,4 +1,4 @@
-const CACHE_NAME = "vt-mapmaker-shell-v2";
+const CACHE_NAME = "vt-mapmaker-shell-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -18,11 +18,8 @@ const APP_SHELL = [
   "./src/pwa-install.js",
   "./src/storage.js",
   "./src/ui-controller.js",
-  "./assets/field/black.png",
   "./assets/field/field.bmp",
   "./assets/field/fielddata.dat",
-  "./assets/field/red.png",
-  "./assets/field/white.png",
   "./assets/object/object.png",
   "./assets/object/objectdata.dat"
 ];
