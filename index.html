@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#171b22">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VT MapMaker">
+  <title>VT MapMaker</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./styles.css?v=10">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-start">
+      <button id="toggle-tools-panel" class="icon-button panel-toggle" title="ツールパネルを開閉" aria-label="ツールパネルを開閉" aria-expanded="false">☰</button>
+      <div class="brand">
+        <h1>VT MapMaker</h1>
+      </div>
+    </div>
+    <div class="file-actions">
+      <span id="backup-status" class="save-indicator">保存準備中</span>
+      <button id="new-map" class="button subtle">新規</button>
+      <label class="button subtle">
+        開く
+        <input id="open-map" type="file" accept=".map,application/octet-stream" hidden>
+      </label>
+      <button id="save-map" class="button primary save-button">保存</button>
+      <button id="toggle-palette-panel" class="icon-button panel-toggle" title="素材パネルを開閉" aria-label="素材パネルを開閉" aria-expanded="false">▦</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside id="tool-panel" class="tool-panel">
+      <section class="panel-section">
+        <div class="section-heading">
+          <h2>編集ツール</h2>
+          <span id="active-tool-name" class="active-tool-name">ペン</span>
+        </div>
+        <div id="tool-buttons" class="tool-grid">
+          <button class="tool-button active" data-tool="pen" title="チップを配置 (P)">
+            <span class="tool-icon">✎</span><span>ペン</span>
+          </button>
+          <button class="tool-button" data-tool="eraser" title="上のレイヤーから消去 (E)">
+            <span class="tool-icon">⌫</span><span>消去</span>
+          </button>
+          <button class="tool-button" data-tool="fill" title="同じ地形を塗りつぶす (F)">
+            <span class="tool-icon">▰</span><span>塗り</span>
+          </button>
+          <button class="tool-button" data-tool="unit" title="ユニット・特殊マーカーを配置 (U)">
+            <span class="tool-icon">@</span><span>配置</span>
+          </button>
+          <button class="tool-button" data-tool="select" title="範囲を選択 (S)">
+            <span class="tool-icon">▣</span><span>選択</span>
+          </button>
+          <button class="tool-button" data-tool="paste" title="コピー内容を貼り付け (V)">
+            <span class="tool-icon">⧉</span><span>貼付</span>
+          </button>
+          <button class="tool-button" data-tool="eyedropper" title="配置記号の設定を取得 (I)">
+            <span class="tool-icon">⌖</span><span>取得</span>
+          </button>
+          <button class="tool-button" data-tool="pan" title="ドラッグしてマップを移動 (H)">
+            <span class="tool-icon">✥</span><span>移動</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="panel-section primary-settings">
+        <h2>描画設定</h2>
+        <label class="range-label">
+          <span>ペン太さ</span>
+          <output id="brush-size-value">1</output>
+        </label>
+        <input id="brush-size" type="range" min="1" max="10" step="1" value="1">
+        <label class="check-row"><input id="allow-overlap" type="checkbox"> 建物を重ねる</label>
+        <label class="check-row"><input id="protect-units" type="checkbox"> 配置記号を保護</label>
+        <label class="check-row"><input id="object-boundary-fill" type="checkbox"> 建物を境界に塗る</label>
+      </section>
+
+      <details class="panel-section disclosure selection-settings" open>
+        <summary>選択範囲</summary>
+        <div class="button-row wrap">
+          <button id="copy-selection" class="button compact">コピー</button>
+          <button id="rotate-left" class="button compact" title="左へ90度回転">↶ 90°</button>
+          <button id="rotate-right" class="button compact" title="右へ90度回転">↷ 90°</button>
+          <button id="flip-horizontal" class="button compact">左右反転</button>
+          <button id="flip-vertical" class="button compact">上下反転</button>
+          <button id="save-selection" class="button compact">素材保存</button>
+          <label class="button compact">
+            素材読込
+            <input id="load-selection" type="file" accept=".map,application/octet-stream" hidden>
+          </label>
+        </div>
+        <p id="selection-summary" class="section-note">範囲未選択</p>
+      </details>
+
+      <details class="panel-section disclosure">
+        <summary>バックアップ</summary>
+        <div class="button-row wrap">
+          <button id="backup-now" class="button compact">今すぐ保存</button>
+          <button id="clear-backups" class="button compact">履歴削除</button>
+          <button id="install-app" class="button compact" type="button" hidden>アプリをインストール</button>
+        </div>
+      </details>
+
+      <details class="panel-section disclosure">
+        <summary>表示設定</summary>
+        <label class="range-label">
+          <span>ズーム</span>
+          <output id="zoom-value">100%</output>
+        </label>
+        <input id="zoom" type="range" min="12" max="96" step="2" value="32">
+        <label class="check-row"><input id="show-grid" type="checkbox" checked> グリッド</label>
+        <label class="check-row"><input id="show-objects" type="checkbox" checked> 建物</label>
+        <label class="check-row"><input id="show-units" type="checkbox" checked> 配置記号</label>
+        <div class="button-row visibility-buttons">
+          <button id="peek-objects" class="button compact">建物を隠す</button>
+          <button id="peek-units" class="button compact">記号を隠す</button>
+        </div>
+      </details>
+
+      <details class="panel-section disclosure">
+        <summary>マップサイズ</summary>
+        <div class="size-grid">
+          <label>幅<input id="map-width" type="number" min="10" max="255" value="60"></label>
+          <label>高さ<input id="map-height" type="number" min="10" max="255" value="60"></label>
+        </div>
+        <button id="resize-map" class="button wide">サイズ変更</button>
+      </details>
+
+      <details class="panel-section disclosure">
+        <summary>上下左右の増減</summary>
+        <div class="expand-grid">
+          <label class="north">上<input id="expand-top" type="number" min="-255" max="255" value="0"></label>
+          <label class="west">左<input id="expand-left" type="number" min="-255" max="255" value="0"></label>
+          <label class="south">下<input id="expand-bottom" type="number" min="-255" max="255" value="0"></label>
+          <label class="east">右<input id="expand-right" type="number" min="-255" max="255" value="0"></label>
+        </div>
+        <button id="expand-map" class="button wide">増減を適用</button>
+      </details>
+
+      <details class="panel-section disclosure unit-settings" open>
+        <summary>配置記号</summary>
+        <label>名前<input id="unit-name" type="text" value="@" maxlength="48" list="unit-presets"></label>
+        <datalist id="unit-presets">
+          <option value="@"><option value="@@"><option value="@1">
+          <option value="@ESC@"><option value="##">
+        </datalist>
+        <div class="size-grid">
+          <label>方向
+            <select id="unit-direction">
+              <option>N</option><option>NW</option><option>W</option><option>SW</option>
+              <option>S</option><option>SE</option><option>E</option><option>NE</option>
+            </select>
+          </label>
+          <label>陣形
+            <select id="unit-form">
+              <option value="0">標準</option><option value="1">密集</option>
+              <option value="2">横列</option><option value="3">縦列</option>
+            </select>
+          </label>
+        </div>
+      </details>
+    </aside>
+
+    <section class="map-stage">
+      <div class="stage-toolbar">
+        <div class="document-info">
+          <strong id="document-name">untitled.map</strong>
+          <span id="document-meta">60 × 60</span>
+        </div>
+        <div class="history-actions">
+          <button id="undo" class="icon-button" title="元に戻す (Ctrl/Cmd + Z)" aria-label="元に戻す">↶</button>
+          <button id="redo" class="icon-button" title="やり直す (Ctrl/Cmd + Shift + Z)" aria-label="やり直す">↷</button>
+        </div>
+        <div class="coordinates">
+          <span>X <b id="cursor-x">-</b></span>
+          <span>Y <b id="cursor-y">-</b></span>
+        </div>
+      </div>
+      <div id="canvas-scroller" class="canvas-scroller">
+        <canvas id="map-canvas" width="1920" height="1920"></canvas>
+        <div id="empty-hint" class="empty-hint">
+          右のパレットから地形を選んで描画してください
+        </div>
+      </div>
+      <div class="status-bar">
+        <span id="status">標準チップを読み込んでいます…</span>
+        <span>Space＋ドラッグ: 移動 / ホイール・ピンチ: ズーム</span>
+      </div>
+    </section>
+
+    <aside id="palette-panel" class="palette-panel">
+      <div class="palette-heading">
+        <strong>素材</strong>
+        <button id="close-palette-panel" class="icon-button panel-close" aria-label="素材パネルを閉じる">×</button>
+      </div>
+      <div class="palette-tabs">
+        <button class="palette-tab active" data-palette="field">フィールド</button>
+        <button class="palette-tab" data-palette="object">オブジェ</button>
+      </div>
+      <div class="palette-import">
+        <label class="button compact wide">
+          <span id="palette-folder-label">フィールドフォルダを読み込む</span>
+          <input id="import-palette-folder" type="file" webkitdirectory directory multiple hidden>
+        </label>
+        <label class="button compact wide">
+          PNGチップ追加
+          <input id="import-chip" type="file" accept="image/png" multiple hidden>
+        </label>
+        <button id="open-material-manager" class="button compact wide">素材を管理…</button>
+        <p id="material-summary" class="section-note">標準素材を使用中</p>
+      </div>
+      <div id="palette" class="palette"></div>
+      <div class="selection-info">
+        <span>選択中</span>
+        <strong id="selected-chip-name">なし</strong>
+      </div>
+    </aside>
+    <button id="panel-backdrop" class="panel-backdrop" aria-label="パネルを閉じる"></button>
+  </main>
+
+  <dialog id="new-dialog">
+    <form method="dialog">
+      <h2>新しいマップ</h2>
+      <div class="dialog-grid">
+        <label>幅<input id="new-width" type="number" min="10" max="255" value="60"></label>
+        <label>高さ<input id="new-height" type="number" min="10" max="255" value="60"></label>
+      </div>
+      <div class="dialog-actions">
+        <button value="cancel" class="button subtle">キャンセル</button>
+        <button id="create-map" value="default" class="button primary">作成</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="restore-dialog">
+    <form method="dialog">
+      <h2>前回の作業があります</h2>
+      <p id="restore-message" class="dialog-message"></p>
+      <div class="dialog-actions">
+        <button id="discard-draft" value="cancel" class="button subtle">破棄する</button>
+        <button id="restore-draft" value="default" class="button primary">復元する</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="material-dialog">
+    <form method="dialog">
+      <h2>素材を管理</h2>
+      <section class="material-manager-section material-import-section">
+        <p class="dialog-message">
+          <code>field</code> または <code>object</code> フォルダを含む親フォルダ、もしくは各フォルダを選択します。
+        </p>
+        <label class="button wide">
+          素材セットを一括読み込み
+          <input id="import-material-set" type="file" webkitdirectory directory multiple hidden>
+        </label>
+      </section>
+      <section class="material-manager-section">
+        <h3>保存済みの追加素材</h3>
+        <p id="stored-material-counts" class="dialog-message">確認中…</p>
+        <div class="button-row wrap">
+          <button id="clear-field-materials" type="button" class="button compact">フィールドを削除</button>
+          <button id="clear-object-materials" type="button" class="button compact">オブジェクトを削除</button>
+          <button id="clear-materials" type="button" class="button compact">すべて削除</button>
+        </div>
+      </section>
+      <div class="dialog-actions">
+        <button value="cancel" class="button primary">閉じる</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="install-dialog">
+    <form method="dialog">
+      <h2>アプリとして追加</h2>
+      <p id="install-instructions" class="dialog-message"></p>
+      <div class="dialog-actions">
+        <button value="cancel" class="button primary">閉じる</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="./src/app.js?v=17"></script>
+  <script type="module" src="./src/pwa.js?v=2"></script>
+</body>
+</html>
