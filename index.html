@@ -11,7 +11,7 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
-  <link rel="stylesheet" href="./styles.css?v=10">
+  <link rel="stylesheet" href="./styles.css?v=11">
 </head>
 <body>
   <header class="app-header">
@@ -23,6 +23,7 @@
     </div>
     <div class="file-actions">
       <span id="backup-status" class="save-indicator">保存準備中</span>
+      <button id="install-app" class="button compact subtle install-button" type="button" hidden>インストール</button>
       <button id="new-map" class="button subtle">新規</button>
       <label class="button subtle">
         開く
@@ -102,7 +103,6 @@
         <div class="button-row wrap">
           <button id="backup-now" class="button compact">今すぐ保存</button>
           <button id="clear-backups" class="button compact">履歴削除</button>
-          <button id="install-app" class="button compact" type="button" hidden>アプリをインストール</button>
         </div>
       </details>
 

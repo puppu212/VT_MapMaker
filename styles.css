@@ -58,6 +58,7 @@ button, label.button { user-select: none; }
   white-space: nowrap;
 }
 .file-actions { min-width: 0; gap: 7px; }
+.file-actions [hidden] { display: none; }
 .button-row { gap: 8px; }
 .button-row.wrap { flex-wrap: wrap; }
 
@@ -79,6 +80,7 @@ button, label.button { user-select: none; }
 .button.primary:hover { background: var(--accent-2); }
 .button.compact { min-height: 30px; padding: 0 10px; font-size: 12px; }
 .button.wide { width: 100%; }
+.install-button { margin-right: 5px; color: var(--muted); }
 .save-button { min-width: 58px; }
 .visibility-buttons { margin-top: 10px; }
 .icon-button {
@@ -184,6 +186,7 @@ body.tool-eyedropper .unit-settings { display: block; }
 .disclosure[open] > summary::after { transform: rotate(-90deg); }
 .disclosure[open] > summary { padding-bottom: 9px; color: var(--text); }
 .disclosure > :not(summary) { margin-right: 13px; margin-left: 13px; }
+.disclosure > .button.wide { width: calc(100% - 26px); }
 .disclosure > :last-child { margin-bottom: 13px; }
 .disclosure > .section-note { margin-top: 9px; }
 
@@ -500,4 +503,8 @@ dialog h3 { margin: 0 0 8px; font-size: 13px; }
   .coordinates { gap: 4px; }
   .coordinates span { min-width: 40px; padding: 4px 5px; }
   .status-bar { font-size: 9px; }
+}
+
+@media (max-width: 420px) {
+  .brand h1 { display: none; }
 }
